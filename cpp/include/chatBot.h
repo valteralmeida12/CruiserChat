@@ -1,44 +1,46 @@
 #ifndef CHATBOT_H
 #define CHATBOT_H
 
+#include "llama.h"
+#include <memory>
 #include <string>
 #include <vector>
-#include "common.h"
-#include "llama.h"
+#include <utility>
+
+// RAII deleters (current API)
+struct ModelDeleter {
+    void operator()(llama_model* m) const { if (m) llama_model_free(m); }
+};
+struct ContextDeleter {
+    void operator()(llama_context* c) const { if (c) llama_free(c); }
+};
+struct SamplerDeleter {
+    void operator()(llama_sampler* s) const { if (s) llama_sampler_free(s); }
+};
 
 class chatbot {
-private:
-    // custom deleters for llama.cpp types
-    struct ModelDeleter {
-        void operator()(llama_model* m) const { if (m) llama_free(m); }
-    };
-    struct ContextDeleter {
-        void operator()(llama_context* c) const { if (c) llama_free(c); }
-    };
-    struct SamplerDeleter {
-        void operator()(llama_sampler* s) const { if (s) llama_sampler_free(s); }
-    };
-
-    std::unique_ptr<llama_context> _ctx;
-    std::unique_ptr<llama_model> _model;
-    std::unique_ptr<llama_sampler> _sampler;
-
-    llama_batch _batch;
-    llama_token _currToken;
-
-    //vector to store the chat messages
-    std::vector<std::string> _messages;
-
 public:
-    chatbot(const std::string& model_path, float floatingP, float temperature);
-
-    void addMessage(const std::string& message);
-
-    std::string get_response(const std::string& input);
+    chatbot(const std::string& model_path, float temperature = 0.7f, float top_p = 0.95f);
+    ~chatbot() = default; // unique_ptr deleters handle cleanup
     
-    std::string format_prompt();
+    std::string get_response(const std::string& user_input);
+    
+    private:
+    std::string apply_chat_template(bool append_assistant_prefix);
+    void add_user(const std::string& text);
+    void add_assistant(const std::string& text);
 
-    ~chatbot();
-}
+    std::unique_ptr<llama_model,   ModelDeleter>   _model;
+    std::unique_ptr<llama_context, ContextDeleter> _ctx;
+    std::unique_ptr<llama_sampler, SamplerDeleter> _sampler;
+    const llama_vocab* _vocab = nullptr;
 
-#endif
+    // Own the strings safely; don’t store raw C strings in member state
+    std::vector<std::pair<std::string,std::string>> _history; // {role, content}
+
+    float _temp  = 0.7f;
+    float _top_p = 0.95f;
+    int _n_past = 0;
+};
+
+#endif // CHATBOT_H

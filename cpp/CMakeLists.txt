@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.10)
-project(llama_inference)
+project(CruiserChat)
 
 set(CMAKE_CXX_STANDARD 17)
 set(LLAMA_BUILD_COMMON On)
@@ -10,7 +10,7 @@ add_subdirectory("${CMAKE_CURRENT_SOURCE_DIR}/llama.cpp")
 # Build your app
 add_executable(
     CruiserChat
-    source/chatBot.cpp
+    source/chatbot.cpp
     source/main.cpp
 )
 
