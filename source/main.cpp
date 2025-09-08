@@ -82,14 +82,14 @@ int main(int argc, char** argv) {
             input = line;
             
             // Clear any remaining newline and check for additional input
-            // This handles multi-line pasted content properly
+            // This handles multi-line pasted content (snippets for example)
             while (std::cin.rdbuf()->in_avail() > 0 && std::cin.peek() != EOF) {
                 char nextChar = std::cin.peek();
                 if (nextChar == '\n') {
                     std::cin.ignore(1); // consume the newline
-                    break; // stop here for single Enter press
+                    break; 
                 } else {
-                    // There's more content, read the next line
+                    // If there's more content, read the next line
                     if (std::getline(std::cin, line)) {
                         input += "\n" + line;
                     } else {

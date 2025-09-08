@@ -109,17 +109,16 @@ std::string chatbot::get_response(const std::string& user_input) {
         _vocab,
         prompt.c_str(), static_cast<int32_t>(prompt.size()),
         toks.data(), static_cast<int32_t>(toks.size()),
-        /*add_special=*/true, /*parse_special=*/true
+        true, true
     );
         
     if (n_tok < 0) throw std::runtime_error("tokenize failed");
     toks.resize(n_tok);
 
     if (n_tok < 0) throw std::runtime_error("tokenize failed");
-    toks.resize(n_tok);  // This line is crucial!
+    toks.resize(n_tok); 
 
     // 4) Feed prompt tokens safely, one token at a time
-
     for (int i = 0; i < n_tok; ++i) {
         
         llama_batch batch = llama_batch_init(1, 0, 1);
@@ -175,7 +174,7 @@ std::string chatbot::get_response(const std::string& user_input) {
         
         llama_batch next = llama_batch_init(1, 0, 1);
         next.n_tokens = 1;
-        next.token[0] = tok;  // tok should be defined above
+        next.token[0] = tok;
         next.pos[0] = _n_past;
         next.n_seq_id[0] = 1;        
         next.seq_id[0][0] = 0;       
