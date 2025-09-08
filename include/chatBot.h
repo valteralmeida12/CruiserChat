@@ -35,7 +35,6 @@ public:
     std::unique_ptr<llama_sampler, SamplerDeleter> _sampler;
     const llama_vocab* _vocab = nullptr;
 
-    // Own the strings safely; don’t store raw C strings in member state
     std::vector<std::pair<std::string,std::string>> _history; // {role, content}
 
     float _temp  = 0.7f;

@@ -101,7 +101,7 @@ std::string chatbot::get_response(const std::string& user_input) {
     add_user(user_input);
 
     // 2) Build prompt with assistant prefix
-    std::string prompt = apply_chat_template(/*append_assistant_prefix=*/true);
+    std::string prompt = apply_chat_template(true);
     
     // 3) Tokenize prompt
     std::vector<llama_token> toks(prompt.size() + 32);
