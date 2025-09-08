@@ -25,10 +25,14 @@ void writeLogEntry(std::ofstream& log, const std::string& speaker, const std::st
 
 int main(int argc, char** argv) {
     // Override with first argument if provided
-    if (argc < 1) {
-        std::cerr << RED << "Model path is incorrect!";
-        return 1;
+    std::string model_path;
+    if (argc < 2) {
+        model_path = "../models/Phi-3-mini-4k-instruct-q4.gguf";
     }
+    else {
+        model_path = argv[1];
+    }
+    // Save model path from command line
 
     // Ensure logs directory exists
     std::filesystem::path logDir = "../Cruiser_Chat_Logs";
@@ -59,8 +63,6 @@ int main(int argc, char** argv) {
     log << "                         " << std::string(timeBuffer) << "\n";
     log << "═══════════════════════════════════════════════════════════════════════════════\n\n";
 
-    // Save model path from command line
-    std::string model_path = argv[1];
 
     try {
         chatbot bot(model_path);
