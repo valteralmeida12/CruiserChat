@@ -115,46 +115,33 @@ std::string chatbot::get_response(const std::string& user_input) {
     if (n_tok < 0) throw std::runtime_error("tokenize failed");
     toks.resize(n_tok);
 
-    if (n_tok < 0) throw std::runtime_error("tokenize failed");
-    toks.resize(n_tok); 
-
-    // 4) Feed prompt tokens safely, one token at a time
+    // 4) Feed prompt tokens in a single batch
+    llama_batch batch = llama_batch_init(n_tok, 0, 1);
+    
     for (int i = 0; i < n_tok; ++i) {
-        
-        llama_batch batch = llama_batch_init(1, 0, 1);
-        
-        // Set up arrays on stack
-        llama_token token_array[1] = {toks[i]};
-        llama_pos pos_array[1] = {_n_past};
-        llama_seq_id seq_array[1] = {0};
-        llama_seq_id* seq_ptrs_array[1] = {&seq_array[0]};
-        int8_t logit_array[1] = {(i == n_tok - 1) ? (int8_t)1 : (int8_t)0};
-        
-        // Point batch to our stack arrays
-        batch.n_tokens = 1;
-        batch.token[0] = toks[i];
-        batch.pos[0] = _n_past;
-        batch.n_seq_id[0] = 1;        // Number of sequences for this token
-        batch.seq_id[0][0] = 0;       // The actual sequence ID
-        batch.logits[0] = (i == n_tok - 1) ? 1 : 0;
-
-        if (llama_decode(_ctx.get(), batch) != 0) {
-            llama_batch_free(batch);
-            throw std::runtime_error("llama_decode failed at token " + std::to_string(i));
-        }
-
-        llama_batch_free(batch);
-        _n_past++;
+        batch.token[i] = toks[i];
+        batch.pos[i] = _n_past + i;
+        batch.n_seq_id[i] = 1;
+        batch.seq_id[i][0] = 0;
+        batch.logits[i] = (i == n_tok - 1) ? 1 : 0;
     }
+    
+    batch.n_tokens = n_tok;
+
+    if (llama_decode(_ctx.get(), batch) != 0) {
+        llama_batch_free(batch);
+        throw std::runtime_error("llama_decode failed for prompt batch");
+    }
+    
+    _n_past += n_tok;
+    llama_batch_free(batch);
 
     // 5) Generate new tokens
     std::string reply;
     const int max_new_tokens = 512;
 
     for (int step = 0; step < max_new_tokens; ++step) {
-        
         llama_token tok = llama_sampler_sample(_sampler.get(), _ctx.get(), -1);
-        
         llama_sampler_accept(_sampler.get(), tok);
 
         if (llama_vocab_is_eog(_vocab, tok)) {
@@ -166,27 +153,25 @@ std::string chatbot::get_response(const std::string& user_input) {
         if (np > 0) {
             std::string token_text(piece, np);
             reply += token_text;
-            
-            // Print the token as it's generated
             std::cout << token_text << std::flush;
         }
 
-        
-        llama_batch next = llama_batch_init(1, 0, 1);
-        next.n_tokens = 1;
-        next.token[0] = tok;
-        next.pos[0] = _n_past;
-        next.n_seq_id[0] = 1;        
-        next.seq_id[0][0] = 0;       
-        next.logits[0] = 1;          
+        // Create batch for the new token
+        llama_batch next_batch = llama_batch_init(1, 0, 1);
+        next_batch.n_tokens = 1;
+        next_batch.token[0] = tok;
+        next_batch.pos[0] = _n_past;
+        next_batch.n_seq_id[0] = 1;
+        next_batch.seq_id[0][0] = 0;
+        next_batch.logits[0] = 1;
 
-        if (llama_decode(_ctx.get(), next) != 0) {
-            llama_batch_free(next);
+        if (llama_decode(_ctx.get(), next_batch) != 0) {
+            llama_batch_free(next_batch);
             break;
         }
-        llama_batch_free(next);
-
+        
         _n_past++;
+        llama_batch_free(next_batch);
     }
 
     add_assistant(reply);
