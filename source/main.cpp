@@ -47,7 +47,7 @@ std::string get_multiline_input() {
     
     std::string line;
     while (true) {
-        char* line_ptr = readline("");
+        char* line_ptr = readline("<press Enter to send>");
         if (!line_ptr) break;
         line = line_ptr;
         free(line_ptr);
@@ -104,6 +104,7 @@ int main(int argc, char** argv) {
         chatbot bot(model_path);
 
         std::cout << GREEN << "Welcome to CruiserChat\n";
+        std::cout << "Type '>>exit' to quit the application.\n\n" << RESET;
 
         int messageCount = 0;
         while (true) {

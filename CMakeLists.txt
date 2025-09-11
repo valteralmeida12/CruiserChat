@@ -24,34 +24,39 @@ if(ROCM)
     set(GGML_ROCM ON)
 endif()
 
-# Manual readline detection
+# Find readline include directory
 find_path(READLINE_INCLUDE_DIR readline/readline.h
     PATHS /usr/include /usr/local/include
 )
 
+# Find readline library
 find_library(READLINE_LIBRARY NAMES readline
     PATHS /usr/lib /usr/lib/x86_64-linux-gnu /usr/local/lib
 )
 
+# Find ncurses library
 find_library(NCURSES_LIBRARY NAMES ncurses
     PATHS /usr/lib /usr/lib/x86_64-linux-gnu /usr/local/lib
 )
 
-
+# Add llama.cpp subdirectory
 add_subdirectory("${CMAKE_CURRENT_SOURCE_DIR}/llama.cpp")
 
+# Add common library
 add_executable(
     CruiserChat
     source/chatbot.cpp
     source/main.cpp
 )
 
+# Link with common and llama libraries
 target_link_libraries(
     CruiserChat
     PRIVATE
     common llama ggml
 )
 
+# Include directories
 target_include_directories(
     CruiserChat
     PRIVATE
@@ -67,5 +72,6 @@ if(NCURSES_LIBRARY)
     target_link_libraries(CruiserChat PRIVATE ${NCURSES_LIBRARY})
 endif()
 
+# Link pthreads
 find_package(Threads REQUIRED)
 target_link_libraries(CruiserChat PRIVATE Threads::Threads)
