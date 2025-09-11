@@ -1,25 +1,73 @@
-# CruiserChat
+# 🚀 CruiserChat
 
-This is a cpp AI inference chat bot, where the user can run any LLM locally and offline.
+**CruiserChat** is a C++ AI inference chat application that allows you to run Large Language Models (LLMs) locally and offline with GPU acceleration support.
 
-## Setup
+## ✨ Features
 
-To setup the project (run setup script):
+- **Local & Offline**: Run LLMs completely on your own hardware
+- **Multi-GPU Support**: CUDA (NVIDIA), METAL (Apple Silicon), and ROCm (AMD) acceleration
+- **Cross-Platform**: Works on Linux, macOS, and other Unix-like systems
+- **Easy Setup**: Automated setup scripts for different platforms
+
+## 🛠️ Prerequisites
+
+- **C++ Compiler** (GCC/Clang)
+- **CMake** (3.10 or higher)
+- **Git**
+- **Homebrew** (macOS) or **APT** (Linux) package manager
+
+## 📦 Installation
+
+**Linux:**
 ```bash
 ./setup.sh
 ```
 
-## Running the App
+**MacOS:**
+```bash
+./mac-setup.sh
+```
 
-To run the app with the default model:
+## Usage
+
+**To run the app with the default model:**
 ```bash
 cd build
 ./CruiserChat
 ```
 
-To run the app with a different model:
+**To run the app with a different model:**
 ```bash
 ./CruiserChat <model-path>
 ```
 
-> **Note:** This is still a project under progress. GPU compilation and acceleration will be supported with future patches.
+**Exiting the chat:**
+```bash
+You: >>exit
+```
+
+## GPU acceleration
+
+**🟩CUDA (NVIDIA)**
+```bash
+cd build
+rm -rf *
+cmake .. -DCUDA=ON -GNinja 
+ninja
+```
+
+**🔴ROCM (AMD)**
+```bash
+cd build
+rm -rf *
+cmake .. -DROCM=ON -GNinja 
+ninja
+```
+
+**💻 METAL (Apple Silicon)**
+```bash
+cd build
+rm -rf *
+cmake .. -DMETAL=ON -GNinja 
+ninja
+```
