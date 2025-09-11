@@ -25,17 +25,20 @@ public:
     
     std::string get_response(const std::string& user_input);
     
-    private:
+private:    
     std::string apply_chat_template(bool append_assistant_prefix);
     void add_user(const std::string& text);
     void add_assistant(const std::string& text);
+    void reset_context();
 
     std::unique_ptr<llama_model,   ModelDeleter>   _model;
     std::unique_ptr<llama_context, ContextDeleter> _ctx;
     std::unique_ptr<llama_sampler, SamplerDeleter> _sampler;
     const llama_vocab* _vocab = nullptr;
-
-    std::vector<std::pair<std::string,std::string>> _history; // {role, content}
+    
+    // {role, content}
+    std::vector<std::pair<std::string,std::string>> _history; 
+    const size_t max_messages = 2;
 
     float _temp  = 0.7f;
     float _top_p = 0.95f;

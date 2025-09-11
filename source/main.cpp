@@ -3,6 +3,8 @@
 #include <fstream>
 #include <ctime>
 #include <filesystem>
+#include <readline/readline.h>
+#include <readline/history.h>
 
 // Color codes for terminal output
 const std::string RESET = "\033[0m";
@@ -13,14 +15,50 @@ const std::string GREEN = "\033[92m";
 
 void writeLogEntry(std::ofstream& log, const std::string& speaker, const std::string& content) {
     if (speaker == "You") {
-        log << "┌─ USER ─────────────────────────────────────────────────────────────────────\n";
-        log << "│ " << content << "\n";
-        log << "└────────────────────────────────────────────────────────────────────────────\n\n";
+        log << "USER:\n";
+        log << "  " << content << "\n\n";
     } else {
-        log << "╭─ BOT ──────────────────────────────────────────────────────────────────────\n";
-        log << "│ " << content << "\n";
-        log << "╰────────────────────────────────────────────────────────────────────────────\n\n";
+        log << "BOT:\n";
+        log << "  " << content << "\n\n";
     }
+}
+
+std::string get_user_input() {
+    char* input_line = readline((CYAN + "You: " + RESET).c_str());
+    if (!input_line){
+        return ">>exit";
+    }
+
+    std::string input = input_line;
+    free(input_line);
+    
+    if (!input.empty()) {
+        add_history(input.c_str());
+    }
+    
+    return input;
+}
+
+
+std::string get_multiline_input() {
+    std::string input = get_user_input();
+    
+    if (input == ">>exit") return input;
+    
+    std::string line;
+    while (true) {
+        char* line_ptr = readline("");
+        if (!line_ptr) break;
+        line = line_ptr;
+        free(line_ptr);
+        
+        if (line.empty()) break;
+        if (line == ">>exit") return line;
+        
+        input += "\n" + line;
+    }
+    
+    return input;
 }
 
 int main(int argc, char** argv) {
@@ -32,7 +70,6 @@ int main(int argc, char** argv) {
     else {
         model_path = argv[1];
     }
-    // Save model path from command line
 
     // Ensure logs directory exists
     std::filesystem::path logDir = "../Cruiser_Chat_Logs";
@@ -63,7 +100,6 @@ int main(int argc, char** argv) {
     log << "                         " << std::string(timeBuffer) << "\n";
     log << "═══════════════════════════════════════════════════════════════════════════════\n\n";
 
-
     try {
         chatbot bot(model_path);
 
@@ -71,32 +107,9 @@ int main(int argc, char** argv) {
 
         int messageCount = 0;
         while (true) {
-            std::cout << CYAN << "You: ";
-            std::string input;
-            std::string line;
-            
-            // Get first line
-            if (!std::getline(std::cin, line)) break;
-            if (line == ">>exit") break;
-            
-            input = line;
-            
-            // Clear any remaining newline and check for additional input
-            // This handles multi-line pasted content (snippets for example)
-            while (std::cin.rdbuf()->in_avail() > 0 && std::cin.peek() != EOF) {
-                char nextChar = std::cin.peek();
-                if (nextChar == '\n') {
-                    std::cin.ignore(1); // consume the newline
-                    break; 
-                } else {
-                    // If there's more content, read the next line
-                    if (std::getline(std::cin, line)) {
-                        input += "\n" + line;
-                    } else {
-                        break;
-                    }
-                }
-            }
+            // USE READLINE FUNCTION INSTEAD OF OLD INPUT HANDLING
+            std::string input = get_multiline_input();
+            if (input == ">>exit") break;
             
             messageCount++;
 

@@ -36,13 +36,34 @@ chatbot::chatbot(const std::string& model_path, float temperature, float top_p)
     llama_sampler_chain_add(_sampler.get(), llama_sampler_init_dist(LLAMA_DEFAULT_SEED));
 }
 
+void chatbot::reset_context() {
+    _n_past = 0;
+
+    // Clear context memory
+    llama_memory_clear(llama_get_memory(_ctx.get()), true);
+}
+
 // Push to owned history
 void chatbot::add_user(const std::string& text) {
-     _history.emplace_back("user", text); 
+    if( _history.size() > max_messages * 2 ) {
+        // Remove oldest pair (user+assistant)
+        _history.erase(_history.begin(), _history.begin() + 2);
+        // reset context
+        reset_context();
+    }
+
+    _history.emplace_back("user", text);
 }
 
 void chatbot::add_assistant(const std::string& text) {
-     _history.emplace_back("assistant", text); 
+    if( _history.size() > max_messages * 2 ) {
+        // Remove oldest pair (user+assistant)
+        _history.erase(_history.begin(), _history.begin() + 2);
+        // reset context
+        reset_context();
+    }
+
+    _history.emplace_back("assistant", text);
 }
 
 // Build prompt using chat template
@@ -66,33 +87,34 @@ std::string chatbot::apply_chat_template(bool append_assistant_prefix) {
         return s;
     }
     
-    std::string out;
-    out.resize(8192);
+    // Output buffer
+    std::string outputBuffer;
+    outputBuffer.resize(8192);
     int n = llama_chat_apply_template(
         tmpl,
         msgs.data(), msgs.size(),
         append_assistant_prefix,
-        out.data(), static_cast<int32_t>(out.size())
+        outputBuffer.data(), static_cast<int32_t>(outputBuffer.size())
     );
 
     if (n < 0) {
         throw std::runtime_error("llama_chat_apply_template failed (buffer stage)");
     }
 
-    if (n > static_cast<int>(out.size())) {
-        out.resize(n);
+    if (n > static_cast<int>(outputBuffer.size())) {
+        outputBuffer.resize(n);
         n = llama_chat_apply_template(
             tmpl,
             msgs.data(), msgs.size(),
             append_assistant_prefix,
-            out.data(), static_cast<int32_t>(out.size())
+            outputBuffer.data(), static_cast<int32_t>(outputBuffer.size())
         );
         if (n < 0){
             throw std::runtime_error("llama_chat_apply_template failed (resize stage)");
         }
     }
-    out.resize(n);
-    return out;
+    outputBuffer.resize(n);
+    return outputBuffer;
 }
 
 // Generate response
