@@ -47,10 +47,17 @@ std::string get_multiline_input() {
     
     std::string line;
     while (true) {
-        char* line_ptr = readline("<press Enter to send>");
+        // Print the prompt
+        printf("<press Enter to send>");
+        
+        char* line_ptr = readline("");
         if (!line_ptr) break;
         line = line_ptr;
         free(line_ptr);
+
+        // Move cursor to beginning of line and clear it
+        printf("\r\033[K");
+        fflush(stdout);
         
         if (line.empty()) break;
         if (line == ">>exit") return line;
