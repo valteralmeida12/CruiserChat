@@ -8,6 +8,7 @@ set(LLAMA_BUILD_COMMON On)
 option(CUDA "Enable CUDA support" OFF)
 option(METAL "Enable Metal support" OFF)
 option(ROCM "Enable AMD ROCm/HIP support" OFF) 
+option(SYCL "Enable Intel Sycl support" OFF)
 
 # Map CUDA to GGML_CUDA for llama.cpp compatibility
 if(CUDA)
@@ -22,6 +23,11 @@ endif()
 # Map ROCM to GGML_ROCM for llama.cpp compatibility
 if(ROCM)
     set(GGML_ROCM ON)
+endif()
+
+# Map SYCL to GGML_SYCL for llama.cpp compatibility
+if(SYCL)
+    set(GGML_SYCL ON)
 endif()
 
 # Find readline include directory
