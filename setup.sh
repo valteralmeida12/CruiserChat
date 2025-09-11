@@ -9,8 +9,8 @@ echo "Starting CruiserChat setup..."
 # Update package lists
 sudo apt-get update
 
-# Install dependencies (example: git, python3, pip)
-sudo apt-get install cmake gcc -y
+# Install dependencies
+sudo apt-get install cmake gcc -y ninja-build libreadline-dev
 
 # Initialize and update git submodules
 git submodule update --init --recursive
@@ -31,8 +31,8 @@ fi
 # Build app
 mkdir -p build
 cd build
-cmake ..
-make -j
+cmake .. -GNinja
+ninja
 
 echo ""
 echo " CruiserChat setup complete!"
