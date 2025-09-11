@@ -21,7 +21,7 @@ chatbot::chatbot(const std::string& model_path, float temperature, float top_p)
     llama_context_params cparams = llama_context_default_params();
     cparams.type_k = GGML_TYPE_F16;
     cparams.type_v = GGML_TYPE_F16;
-    cparams.n_ctx = 4096;
+    cparams.n_ctx = 8192;
     _ctx.reset(llama_init_from_model(_model.get(), cparams));
 
     if (!_ctx) {
