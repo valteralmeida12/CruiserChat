@@ -31,9 +31,20 @@ chatbot::chatbot(const std::string& model_path, float temperature, float top_p)
     // Sampler: chain(top_p, temp, seed-dist)
     llama_sampler_chain_params chain = llama_sampler_chain_default_params();
     _sampler.reset(llama_sampler_chain_init(chain));
+
+    // repetition penalty, top-p, temperature, seed-based frequency distortion
+    llama_sampler_chain_add(_sampler.get(), llama_sampler_init_penalties(
+        64,    // penalty_last_n: look back 64 tokens
+        1.2f,  // penalty_repeat: repetition penalty (1.0 = disabled)
+        0.1f,  // penalty_freq: frequency penalty (0 = disabled)
+        0.1f   // penalty_present: presence penalty (0 = disabled)
+    ));
     llama_sampler_chain_add(_sampler.get(), llama_sampler_init_top_p(_top_p, 1));
     llama_sampler_chain_add(_sampler.get(), llama_sampler_init_temp(_temp));
     llama_sampler_chain_add(_sampler.get(), llama_sampler_init_dist(LLAMA_DEFAULT_SEED));
+
+    // Add system prompt to avoid repetition
+    _history.emplace_back("system", "You are a helpful AI assistant. Provide concise, accurate answers without repetition. If you don't know something, say so rather than making up information.");
 }
 
 void chatbot::reset_context() {
