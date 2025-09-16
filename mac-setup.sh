@@ -21,10 +21,9 @@ if [ ! -d "models" ]; then
     mkdir models
 fi
 
-if [ ! -f "models/Phi-3-mini-4k-instruct-q4.gguf" ]; then
+if [ ! -f "models/Llama-3.2-3B-Instruct-Q6_K.gguf" ]; then
     echo "Downloading Phi-3 Mini model..."
-    curl -L -o "models/Phi-3-mini-4k-instruct-q4.gguf" "https://huggingface.co/microsoft/Phi-3-mini-4k-instruct-gguf/resolve/main/Phi-3-mini-4k-instruct-q4.gguf"
-else
+    curl -L -o "models/Llama-3.2-3B-Instruct-Q6_K.gguf" "https://huggingface.co/bartowski/Llama-3.2-3B-Instruct-GGUF/resolve/main/Llama-3.2-3B-Instruct-Q6_K.gguf?download=true"
     echo "Model already exists, skipping download..."
 fi
 
@@ -37,7 +36,7 @@ ninja
 echo ""
 echo " CruiserChat setup complete!"
 echo ""
-echo "Model location: $(pwd)/../models/Phi-3-mini-4k-instruct-q4.gguf"
+echo "Model location: $(pwd)/../models/Llama-3.2-3B-Instruct-Q6_K.gguf"
 echo ""
 echo "To run CruiserChat:"
 echo "  cd build"

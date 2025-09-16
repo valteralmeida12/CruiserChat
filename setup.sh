@@ -21,9 +21,9 @@ if [ ! -d "models" ]; then
     mkdir models
 fi
 
-if [ ! -f "models/Phi-3-mini-4k-instruct-q4.gguf" ]; then
-    echo "Downloading Phi-3 Mini model..."
-    wget -O "models/Phi-3-mini-4k-instruct-q4.gguf" "https://huggingface.co/microsoft/Phi-3-mini-4k-instruct-gguf/resolve/main/Phi-3-mini-4k-instruct-q4.gguf"
+if [ ! -f "models/Llama-3.2-3B-Instruct-Q6_K.gguf" ]; then
+    echo "Downloading Llama 3.2 3B..."
+    wget -O "models/Llama-3.2-3B-Instruct-Q6_K.gguf" "https://huggingface.co/bartowski/Llama-3.2-3B-Instruct-GGUF/resolve/main/Llama-3.2-3B-Instruct-Q6_K.gguf?download=true"
 else
     echo "Model already exists, skipping download..."
 fi
@@ -37,13 +37,10 @@ ninja
 echo ""
 echo " CruiserChat setup complete!"
 echo ""
-echo "Model location: $(pwd)/../models/Phi-3-mini-4k-instruct-q4.gguf"
+echo "Model location: $(pwd)/../models/Llama-3.2-3B-Instruct-Q8_0.gguf"
 echo ""
-echo "To run CruiserChat:"
-echo "  cd build"
-echo "  ./CruiserChat"
+echo "To run (./CruiserChat --help) to see how to run the application"
 echo ""
-echo "Or run with custom model:"
-echo "  ./CruiserChat /path/to/your/model.gguf"
+echo "NOTE: The application was built without GPU support. For GPU support, please refer to the README.md"\n
+echo "and choose the software compatible with your GPU."
 echo ""
-echo "Type '>>exit' in the chat to quit."

@@ -36,9 +36,14 @@ cd build
 ./CruiserChat
 ```
 
+**Chat help:**
+```bash
+./CruiserChat --help
+```
+
 **To run the app with a different model:**
 ```bash
-./CruiserChat <model-path>
+./CruiserChat --model (or --m) <model-path>
 ```
 
 **Exiting the chat:**
